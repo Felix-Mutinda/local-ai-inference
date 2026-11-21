@@ -96,8 +96,9 @@ async def chat_completions(
     created = int(time.time())
 
     if body.stream:
+        usage = bool(body.stream_options and body.stream_options.include_usage)
         return StreamingResponse(
-            _sse(events, completion_id, created, model_id), media_type="text/event-stream"
+            _sse(events, completion_id, created, model_id, usage), media_type="text/event-stream"
         )
 
     text: list[str] = []
@@ -126,7 +127,11 @@ async def chat_completions(
 
 
 async def _sse(
-    events: AsyncIterator[Delta | Done], completion_id: str, created: int, model_id: str
+    events: AsyncIterator[Delta | Done],
+    completion_id: str,
+    created: int,
+    model_id: str,
+    include_usage: bool = False,
 ) -> AsyncIterator[str]:
     def chunk(delta: ChunkDelta, finish: str | None = None) -> str:
         c = ChatCompletionChunk(
@@ -143,4 +148,17 @@ async def _sse(
             yield chunk(ChunkDelta(content=event.text))
         else:
             yield chunk(ChunkDelta(), event.finish_reason)
+            if include_usage:  # OpenAI's convention: one extra chunk, no choices, with usage
+                last = ChatCompletionChunk(
+                    id=completion_id,
+                    created=created,
+                    model=model_id,
+                    choices=[],
+                    usage=Usage(
+                        prompt_tokens=event.prompt_tokens,
+                        completion_tokens=event.completion_tokens,
+                        total_tokens=event.prompt_tokens + event.completion_tokens,
+                    ),
+                )
+                yield f"data: {last.model_dump_json(exclude_none=True)}\n\n"
     yield "data: [DONE]\n\n"

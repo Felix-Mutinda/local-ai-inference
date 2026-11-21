@@ -18,6 +18,7 @@ uv run ruff format .       # format
 uv run local-ai-inference        # start the server on http://127.0.0.1:8000
 uv run local-ai-inference inspect <file.gguf>   # summarise a model file
 uv run local-ai-inference serve --model <file.gguf>   # serve a real model
+uv run local-ai-inference bench --model <id>   # benchmark a running server
 ```
 
 Tests that need a real model file are marked `model` and skipped by default:
@@ -46,7 +47,7 @@ Run `git checkout main` to return to the latest code.
 | `step-01` | Serving layer: API + server + stub engine | done |
 | `step-02` | Parser: GGUF reader | done |
 | `step-03` | Engine: forward pass, KV cache, sampler | done |
-| `step-04` | Measure: metrics, memory, cold vs warm, parity | next |
+| `step-04` | Measure: benchmark and llama.cpp comparison | done |
 
 ## Step 01: serving layer
 
@@ -194,17 +195,73 @@ unchanged with that model ID.
 - Decoding token by token with the KV cache gives the same logits as recomputing from scratch.
 - Greedy generation is deterministic; seeded sampling is reproducible.
 - `uv run pytest -m model` asks the real model for the capital of France and expects "Paris".
-- Against llama.cpp on the same Q8_0 file: identical tokenization of the chat prompts, and the
-  same perplexity on 400 tokens of text (17.836 vs 17.835). The two pick the same top token
-  96.8% of the time; the rest are near-ties, because llama.cpp also rounds activations to 8 bits
-  inside its Q8_0 matrix multiply while this engine keeps them in float32. So greedy outputs
-  agree for the first few tokens and can then drift apart.
+- Against llama.cpp on the same Q8_0 file, the two engines tokenize identically, score text
+  with near-identical perplexity, and pick the same next token about 96% of the time; the rest
+  are near-ties. Step 04 has the numbers and the script that reproduces them.
 
 **One bug worth knowing about.** An early version ran at 2 tokens/s instead of ~18. Dividing
 float32 attention scores by `np.sqrt(64)`, which is a float64 scalar, silently turned the
 activations into float64, so every matrix multiply converted the 538 MB of float32 weights to
 float64 first. Dividing by `math.sqrt(64)` (a plain Python float) fixed it, and a test now checks
 that the logits stay float32.
+
+## Step 04: measure
+
+![Step 04: measure](docs/diagrams/step-04-measure.svg)
+
+Two tools, both reproducible:
+
+- `local-ai-inference bench` streams greedy completions from **any** OpenAI-compatible server
+  (this one, llama-server, Ollama...) and reports time to first token, prompt tokens/s and
+  decode tokens/s. Each request gets a unique tag, so a server with prompt caching can't skip
+  the prompt. Results can be appended to a CSV.
+- `scripts/compare_llama_cpp.py` feeds the same text to this engine and to llama.cpp, one token
+  at a time, and compares tokenization, perplexity and the top predicted token at every position.
+
+The server's `/metrics` now also reports `lai_process_resident_bytes` (memory held by the
+process), and streaming responses honour `stream_options.include_usage`.
+
+**Results** on one machine (2-vCPU Linux container, 2 threads each, SmolLM2-135M-Instruct
+Q8_0, llama.cpp via llama-cpp-python 0.3.37):
+
+| | local-ai-inference | llama.cpp |
+|---|---|---|
+| Perplexity, 276 tokens | 50.31 | 50.60 |
+| Same top-1 token | 96.4% of positions | |
+| First token, 46-token prompt | 0.25 s | 0.13 s |
+| First token, 423-token prompt | 2.74 s | 2.19 s |
+| Decode speed | 15 tok/s | 28–36 tok/s |
+| Server memory (RSS) | 0.86 GB | 0.56 GB |
+| Weight bytes read per token | 538 MB | 143 MB |
+
+What it means: both engines run the model correctly. llama.cpp decodes about twice as fast and
+holds less memory; it keeps the weights in Q8_0 and uses hand-written CPU kernels, while this
+engine expands them to float32 and so reads about 3.7× more bytes for every token. Prompt
+processing is closer, because NumPy hands those large matrix multiplies to BLAS. Your numbers
+will differ; re-run them.
+
+**Try it**
+
+```bash
+git checkout step-04
+uv sync
+
+# terminal 1: this server
+uv run local-ai-inference serve --model models/SmolLM2-135M-Instruct-Q8_0.gguf
+
+# terminal 2: benchmark it, saving the results
+uv run local-ai-inference bench --model SmolLM2-135M-Instruct-Q8_0 \
+  --label "local-ai-inference" --csv results/bench.csv
+
+# the same benchmark against llama.cpp's server (port 8080), for comparison
+llama-server -m models/SmolLM2-135M-Instruct-Q8_0.gguf --port 8080
+uv run local-ai-inference bench --url http://127.0.0.1:8080/v1 \
+  --model SmolLM2-135M-Instruct-Q8_0 --label "llama.cpp" --csv results/bench.csv
+
+# token-by-token agreement with llama.cpp (installs llama-cpp-python into the venv)
+uv pip install llama-cpp-python
+uv run python scripts/compare_llama_cpp.py models/SmolLM2-135M-Instruct-Q8_0.gguf
+```
 
 ## Layout
 
@@ -217,6 +274,7 @@ src/local_ai_inference/
   app.py      wires the layers together
 tests/        fast tests; real-model tests are marked `model`
 docs/diagrams one diagram per step
+scripts/      compare_llama_cpp.py
 models/       downloaded GGUF files (git-ignored)
 ```
 

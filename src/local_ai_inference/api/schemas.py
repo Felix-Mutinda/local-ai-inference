@@ -13,6 +13,10 @@ class ChatMessage(BaseModel):
     content: str
 
 
+class StreamOptions(BaseModel):
+    include_usage: bool = False
+
+
 class ChatCompletionRequest(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
@@ -25,6 +29,7 @@ class ChatCompletionRequest(BaseModel):
     seed: int | None = None
     stop: str | list[str] | None = None
     stream: bool = False
+    stream_options: StreamOptions | None = None
 
     def token_budget(self, default: int = 256) -> int:
         return self.max_completion_tokens or self.max_tokens or default
@@ -78,6 +83,7 @@ class ChatCompletionChunk(BaseModel):
     created: int
     model: str
     choices: list[ChunkChoice]
+    usage: Usage | None = None  # only on the last chunk, when stream_options.include_usage
 
 
 class ModelCard(BaseModel):

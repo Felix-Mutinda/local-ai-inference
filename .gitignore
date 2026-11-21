@@ -19,6 +19,8 @@ models/
 *.gguf
 *.safetensors
 
+results/
+
 # Editors / OS
 .vscode/
 .idea/

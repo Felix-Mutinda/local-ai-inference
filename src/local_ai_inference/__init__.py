@@ -10,7 +10,7 @@ Layers, top to bottom:
 import argparse
 import json
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -37,8 +37,24 @@ def main(argv: list[str] | None = None) -> None:
         "--tensors", type=int, default=0, metavar="N", help="list the first N tensors"
     )
 
+    bench = sub.add_parser("bench", help="benchmark any OpenAI-compatible server")
+    bench.add_argument("--url", default="http://127.0.0.1:8000/v1", help="server base URL")
+    bench.add_argument("--model", required=True, help="model ID the server expects")
+    bench.add_argument("--label", help="name for this run (default: the URL)")
+    bench.add_argument("--runs", type=int, default=3)
+    bench.add_argument("--max-tokens", type=int, default=64)
+    bench.add_argument("--csv", help="append results to this CSV file")
+
     args = parser.parse_args(argv)
-    if args.command == "inspect":
+    if args.command == "bench":
+        from local_ai_inference.bench import append_csv, bench, print_table
+
+        rows = bench(args.url, args.model, runs=args.runs, max_tokens=args.max_tokens)
+        label = args.label or args.url
+        print_table(rows, label)
+        if args.csv:
+            append_csv(args.csv, rows, label)
+    elif args.command == "inspect":
         _inspect(args.path, show_keys=args.keys, n_tensors=args.tensors)
     else:
         if args.command is None:  # `local-ai-inference` alone means serve, with defaults

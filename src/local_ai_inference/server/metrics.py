@@ -1,5 +1,6 @@
 """Operations: Prometheus metrics, one registry per server instance."""
 
+import psutil
 from prometheus_client import (
     CONTENT_TYPE_LATEST,
     CollectorRegistry,
@@ -38,6 +39,11 @@ class Metrics:
         self.model_load = Gauge(
             "lai_model_load_seconds", "Time to load and warm the model", registry=r
         )
+        self.resident_bytes = Gauge(
+            "lai_process_resident_bytes", "Memory this server process holds in RAM", registry=r
+        )
+        self._process = psutil.Process()
 
     def render(self) -> bytes:
+        self.resident_bytes.set(self._process.memory_info().rss)
         return generate_latest(self.registry)
