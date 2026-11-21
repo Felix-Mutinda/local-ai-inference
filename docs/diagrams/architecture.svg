@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000" role="img" aria-labelledby="t d" xmlns:c2pa="http://c2pa.org/manifest">
+<title id="t">Local AI Inference: architecture</title>
+<desc id="d">A client calls the OpenAI-compatible API over HTTP. The API hands validated requests to the server, which manages lifecycle, admission, prompt preparation, output control, streaming and metrics. The server calls the engine through the Engine protocol; the engine tokenizes, runs the forward pass with a KV cache and samples. At startup the engine loads weights from the GGUF parser through the ModelFile protocol.</desc>
+<defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#0f6e56"/></marker>
+<marker id="ahg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5f5e5a"/></marker>
+</defs>
+<rect width="800" height="1000" fill="#ffffff"/>
+<text x="400" y="62" text-anchor="middle" font-family="Poppins, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="34" font-weight="700"><tspan fill="#1a3a52">Local AI Inference</tspan><tspan fill="#1a3a52" dx="12">·</tspan><tspan fill="#c57926" dx="12">Architecture</tspan></text>
+<g font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<rect x="250" y="100" width="300" height="52" rx="8" fill="#f1efe8" stroke="#5f5e5a" stroke-width="1.5"/>
+<text x="400" y="124" text-anchor="middle" font-size="16" font-weight="600" fill="#2d2d2d">Client</text>
+<text x="400" y="142" text-anchor="middle" font-size="12" font-weight="400" fill="#5f5e5a">OpenAI SDK · curl · bench</text>
+<line x1="400" y1="152" x2="400" y2="196" stroke="#0f6e56" stroke-width="2" marker-end="url(#ah)"/>
+<text x="412" y="179.0" text-anchor="start" font-size="13" font-weight="600" fill="#2d2d2d">HTTP · SSE</text>
+<rect x="80" y="198" width="640" height="96" rx="8" fill="#e1f5ee" stroke="#0f6e56" stroke-width="1.5"/>
+<text x="100" y="226" text-anchor="start" font-size="16" font-weight="600" fill="#085041">API</text>
+<text x="700" y="226" text-anchor="end" font-size="12" font-weight="400" fill="#0f6e56" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">api/ · step-01</text>
+<rect x="100" y="244" width="140" height="34" rx="6" fill="#ffffff" stroke="#0f6e56" stroke-width="1"/>
+<text x="170.0" y="266.0" text-anchor="middle" font-size="12" font-weight="500" fill="#085041" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">GET /v1/models</text>
+<rect x="250" y="244" width="250" height="34" rx="6" fill="#ffffff" stroke="#0f6e56" stroke-width="1"/>
+<text x="375.0" y="266.0" text-anchor="middle" font-size="12" font-weight="500" fill="#085041" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">POST /v1/chat/completions</text>
+<rect x="510" y="244" width="95" height="34" rx="6" fill="#ffffff" stroke="#0f6e56" stroke-width="1"/>
+<text x="557.5" y="266.0" text-anchor="middle" font-size="12" font-weight="500" fill="#085041" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">/health</text>
+<rect x="615" y="244" width="85" height="34" rx="6" fill="#ffffff" stroke="#0f6e56" stroke-width="1"/>
+<text x="657.5" y="266.0" text-anchor="middle" font-size="12" font-weight="500" fill="#085041" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">/metrics</text>
+<line x1="400" y1="294" x2="400" y2="334" stroke="#0f6e56" stroke-width="2" marker-end="url(#ah)"/>
+<text x="412" y="319.0" text-anchor="start" font-size="13" font-weight="600" fill="#2d2d2d">Pydantic models</text>
+<rect x="80" y="336" width="640" height="140" rx="8" fill="#e1f5ee" stroke="#0f6e56" stroke-width="1.5"/>
+<text x="100" y="364" text-anchor="start" font-size="16" font-weight="600" fill="#085041">Server</text>
+<text x="700" y="364" text-anchor="end" font-size="12" font-weight="400" fill="#0f6e56" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">server/ · step-01</text>
+<rect x="100.0" y="382" width="193.3" height="34" rx="6" fill="#ffffff" stroke="#0f6e56" stroke-width="1"/>
+<text x="196.7" y="404.0" text-anchor="middle" font-size="13" font-weight="500" fill="#085041">Lifecycle</text>
+<rect x="303.3" y="382" width="193.3" height="34" rx="6" fill="#ffffff" stroke="#0f6e56" stroke-width="1"/>
+<text x="400.0" y="404.0" text-anchor="middle" font-size="13" font-weight="500" fill="#085041">Admission</text>
+<rect x="506.7" y="382" width="193.3" height="34" rx="6" fill="#ffffff" stroke="#0f6e56" stroke-width="1"/>
+<text x="603.3" y="404.0" text-anchor="middle" font-size="13" font-weight="500" fill="#085041">Prompt prep</text>
+<rect x="100.0" y="426" width="193.3" height="34" rx="6" fill="#ffffff" stroke="#0f6e56" stroke-width="1"/>
+<text x="196.7" y="448.0" text-anchor="middle" font-size="13" font-weight="500" fill="#085041">Output control</text>
+<rect x="303.3" y="426" width="193.3" height="34" rx="6" fill="#ffffff" stroke="#0f6e56" stroke-width="1"/>
+<text x="400.0" y="448.0" text-anchor="middle" font-size="13" font-weight="500" fill="#085041">Streaming</text>
+<rect x="506.7" y="426" width="193.3" height="34" rx="6" fill="#ffffff" stroke="#0f6e56" stroke-width="1"/>
+<text x="603.3" y="448.0" text-anchor="middle" font-size="13" font-weight="500" fill="#085041">Metrics</text>
+<line x1="400" y1="476" x2="400" y2="516" stroke="#0f6e56" stroke-width="2" marker-end="url(#ah)"/>
+<text x="412" y="494.0" text-anchor="start" font-size="13" font-weight="600" fill="#2d2d2d">Engine protocol</text>
+<text x="412" y="511.0" text-anchor="start" font-size="12" font-weight="400" fill="#666666" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">tokenize · generate(ids)</text>
+<rect x="80" y="518" width="640" height="96" rx="8" fill="#e1f5ee" stroke="#0f6e56" stroke-width="1.5"/>
+<text x="100" y="546" text-anchor="start" font-size="16" font-weight="600" fill="#085041">Engine</text>
+<text x="700" y="546" text-anchor="end" font-size="12" font-weight="400" fill="#0f6e56" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">engine/ · step-03</text>
+<rect x="100.0" y="564" width="142.5" height="34" rx="6" fill="#ffffff" stroke="#0f6e56" stroke-width="1"/>
+<text x="171.2" y="586.0" text-anchor="middle" font-size="13" font-weight="500" fill="#085041">Tokenizer</text>
+<rect x="252.5" y="564" width="142.5" height="34" rx="6" fill="#ffffff" stroke="#0f6e56" stroke-width="1"/>
+<text x="323.8" y="586.0" text-anchor="middle" font-size="13" font-weight="500" fill="#085041">Forward pass</text>
+<rect x="405.0" y="564" width="142.5" height="34" rx="6" fill="#ffffff" stroke="#0f6e56" stroke-width="1"/>
+<text x="476.2" y="586.0" text-anchor="middle" font-size="13" font-weight="500" fill="#085041">KV cache</text>
+<rect x="557.5" y="564" width="142.5" height="34" rx="6" fill="#ffffff" stroke="#0f6e56" stroke-width="1"/>
+<text x="628.8" y="586.0" text-anchor="middle" font-size="13" font-weight="500" fill="#085041">Sampler</text>
+<line x1="400" y1="656" x2="400" y2="614" stroke="#5f5e5a" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#ahg)"/>
+<text x="412" y="633.0" text-anchor="start" font-size="13" font-weight="600" fill="#5f5e5a">ModelFile protocol · at startup</text>
+<text x="412" y="650.0" text-anchor="start" font-size="12" font-weight="400" fill="#666666" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">metadata · tensor(name)</text>
+<rect x="80" y="658" width="640" height="96" rx="8" fill="#ffffff" stroke="#314d95" stroke-width="1.5"/>
+<text x="100" y="686" text-anchor="start" font-size="16" font-weight="600" fill="#1a3a52">Parser</text>
+<text x="700" y="686" text-anchor="end" font-size="12" font-weight="400" fill="#666666" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">parser/ · step-02</text>
+<rect x="100.0" y="704" width="142.5" height="34" rx="6" fill="#ffffff" stroke="#314d95" stroke-width="1"/>
+<text x="171.2" y="726.0" text-anchor="middle" font-size="13" font-weight="500" fill="#1a3a52">Header + metadata</text>
+<rect x="252.5" y="704" width="142.5" height="34" rx="6" fill="#ffffff" stroke="#314d95" stroke-width="1"/>
+<text x="323.8" y="726.0" text-anchor="middle" font-size="13" font-weight="500" fill="#1a3a52">Tensor index</text>
+<rect x="405.0" y="704" width="142.5" height="34" rx="6" fill="#ffffff" stroke="#314d95" stroke-width="1"/>
+<text x="476.2" y="726.0" text-anchor="middle" font-size="13" font-weight="500" fill="#1a3a52">mmap</text>
+<rect x="557.5" y="704" width="142.5" height="34" rx="6" fill="#ffffff" stroke="#314d95" stroke-width="1"/>
+<text x="628.8" y="726.0" text-anchor="middle" font-size="13" font-weight="500" fill="#1a3a52">Dequantize</text>
+<line x1="400" y1="794" x2="400" y2="754" stroke="#5f5e5a" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#ahg)"/>
+<rect x="250" y="796" width="300" height="52" rx="8" fill="#ffffff" stroke="#314d95" stroke-width="1.5"/>
+<text x="400" y="820" text-anchor="middle" font-size="16" font-weight="600" fill="#1a3a52">GGUF file</text>
+<text x="400" y="838" text-anchor="middle" font-size="12" font-weight="400" fill="#666666">SmolLM2-135M-Instruct Q8_0</text>
+<text x="400" y="905" text-anchor="middle" font-size="18" font-weight="400" fill="#2d2d2d" font-style="italic">Four layers, three contracts, <tspan font-weight="700" fill="#a45a00">one request path.</tspan></text>
+<text x="32" y="952" text-anchor="start" font-size="13" font-weight="400" fill="#666666">solid = request path · dashed = load path at startup · teal = runs · blue = data · step-04 measures it all</text>
+</g>
+<g transform="translate(713 904) scale(0.0554)" aria-label="AI System Design mark">
+<g>
+<polygon fill="#c57926" points="501.0,17.8 501.0,314.6 981.5,295.3"/>
+<polygon fill="#c57926" points="501.0,314.6 981.5,295.3 741.9,724.0"/>
+<polygon fill="#c57926" points="981.5,295.3 741.9,724.0 982.2,852.0"/>
+</g>
+<g fill="none" stroke="#314d95" stroke-width="17.8" stroke-linejoin="miter" stroke-linecap="round">
+<polygon points="501.0,17.8 981.5,295.3 982.2,852.0 502.5,1137.3 18.9,853.2 17.8,298.4"/>
+<polygon points="501.0,314.6 741.9,724.0 260.0,724.2"/>
+<polyline points="17.8,298.4 501.0,314.6 981.5,295.3"/>
+<polyline points="501.0,17.8 501.0,314.6"/>
+<polyline points="17.8,298.4 260.0,724.2 18.9,853.2"/>
+<polyline points="981.5,295.3 741.9,724.0 982.2,852.0"/>
+<polyline points="260.0,724.2 502.5,1137.3 741.9,724.0"/>
+</g>
+</g>
+<metadata><c2pa:manifest>AAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYTo1MzY1ZWJiNy1mNDZiLTQ1YmQtODNiNy1mNmQ0NThmM2I4NzEAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaIGNFmK9Q7sAsEebazVkbZgAAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDo5ZjI2YmVkMS1iYTgyLTQ4MTAtYjM0OS02N2ZjMGQxNzg1MGRscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNoV0s/lr1tgOAXZNNzopn/7QAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggbCLR5vjjqVEP3/WDDYsCp/oZb12AyUpTcjX655a9xVKkZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaJFzTVj++3TnasjbcnIvSBsAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRMAAAAAAAAAAAAAAAAZGhhc2hYIK5qUlgSRZnBz/0kGNghGuZvU6z9kOZZkb9owd9oHMGDZG5hbWVuanVtYmYgbWFuaWZlc3RqZXhjbHVzaW9uc4GiZXN0YXJ0GSlZZmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOjUzNjVlYmI3LWY0NmItNDViZC04M2I3LWY2ZDQ1OGYzYjg3MS9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOmRlZjQwYmQ5LTc2M2ItNGZjNS05ZmQ2LTE4NGIyODMwNWFlM3JjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCBsItHm+OOpUQ/f9YMNiwKn+hlvXYDJSlNyNfrnlr3FUqJjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggBGbrNCkYAIX7ub2Q8KfqzHsZczcZSJQlBEqxlXDrZdaiY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFggGaXOwVpVht0Sl81Pgld67wQVjROsfzflDgIp5J0/3pp0Y2xhaW1fZ2VuZXJhdG9yX2luZm+jZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj+OPEz5o+nMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1+UCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9+1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQFmZCip1GrDYRIDWP2TlwcsyMkdiU1JkZgxwHEIXYPYupKWLTVlT+zI2XMKoa791W51AWIAOERijR5MhGXKdY44=</c2pa:manifest></metadata></svg>

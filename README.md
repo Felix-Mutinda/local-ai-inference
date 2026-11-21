@@ -1,10 +1,29 @@
 # local-ai-inference
 
+[![CI](https://github.com/Felix-Mutinda/local-ai-inference/actions/workflows/ci.yml/badge.svg)](https://github.com/Felix-Mutinda/local-ai-inference/actions/workflows/ci.yml)
+
 A custom implementation of the local AI inference stack: a GGUF **parser**, a NumPy **engine**,
 a **server** and an OpenAI-compatible **API**, built one layer at a time.
 
 > A custom server, not a production one. It serves one request at a time on purpose, so each
 > layer stays small enough to understand.
+
+## Architecture
+
+![Local AI Inference: architecture](docs/diagrams/architecture.svg)
+
+A request flows down: the **API** validates it, the **server** decides when it runs and shapes
+the output, and the **engine** turns tokens into the next token. At startup the engine loads
+its weights from the **parser**, which reads the GGUF file. Each boundary is a small contract
+(`Engine`, `ModelFile`), so any layer can be swapped or tested on its own.
+
+| Layer | Folder | Step |
+|---|---|---|
+| API | `api/` | `step-01` |
+| Server | `server/` | `step-01` |
+| Engine | `engine/` | `step-03` (`step-01` stub) |
+| Parser | `parser/` | `step-02` |
+| Measure | `bench.py`, `scripts/` | `step-04` |
 
 ## Quick start
 
@@ -221,8 +240,8 @@ Two tools, both reproducible:
 The server's `/metrics` now also reports `lai_process_resident_bytes` (memory held by the
 process), and streaming responses honour `stream_options.include_usage`.
 
-**Results** on one machine (2-vCPU Linux container, 2 threads each, SmolLM2-135M-Instruct
-Q8_0, llama.cpp via llama-cpp-python 0.3.37):
+**Results**, measured in a 2-vCPU Linux container (2 threads per server, SmolLM2-135M-Instruct
+Q8_0, greedy, median of 3, llama.cpp via llama-cpp-python 0.3.37):
 
 | | local-ai-inference | llama.cpp |
 |---|---|---|
