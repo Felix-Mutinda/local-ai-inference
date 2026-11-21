@@ -3,14 +3,14 @@
 Layers, top to bottom:
     api     -> OpenAI-compatible HTTP contract (step-01)
     server  -> lifecycle, admission, prompt prep, output control, streaming, metrics (step-01)
-    engine  -> tokens in, tokens out; a stub engine until step-03
+    engine  -> tokens in, tokens out: a NumPy Llama with a KV cache (step-03), or a stub
     parser  -> reads a GGUF file (step-02)
 """
 
 import argparse
 import json
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -21,6 +21,8 @@ def main(argv: list[str] | None = None) -> None:
     serve = sub.add_parser("serve", help="start the OpenAI-compatible server (default)")
     serve.add_argument("--host", default="127.0.0.1", help="bind address (default: localhost)")
     serve.add_argument("--port", type=int, default=8000)
+    serve.add_argument("--model", help="GGUF file to serve (default: the stub engine)")
+    serve.add_argument("--ctx", type=int, default=2048, help="max context tokens (KV cache size)")
     serve.add_argument(
         "--token-delay",
         type=float,
@@ -41,16 +43,22 @@ def main(argv: list[str] | None = None) -> None:
     else:
         if args.command is None:  # `local-ai-inference` alone means serve, with defaults
             args = serve.parse_args([])
-        _serve(args.host, args.port, args.token_delay)
+        _serve(args.host, args.port, args.model, args.ctx, args.token_delay)
 
 
-def _serve(host: str, port: int, token_delay: float) -> None:
+def _serve(host: str, port: int, model: str | None, ctx: int, token_delay: float) -> None:
     import uvicorn
 
     from local_ai_inference.app import create_app
     from local_ai_inference.engine import StubEngine
 
-    uvicorn.run(create_app(StubEngine(token_delay=token_delay)), host=host, port=port)
+    if model:
+        from local_ai_inference.engine.gguf_engine import GGUFEngine
+
+        engine = GGUFEngine(model, max_context=ctx)
+    else:
+        engine = StubEngine(token_delay=token_delay)
+    uvicorn.run(create_app(engine), host=host, port=port)
 
 
 def _inspect(path: str, *, show_keys: bool, n_tensors: int) -> None:

@@ -17,6 +17,7 @@ uv run ruff check .        # lint
 uv run ruff format .       # format
 uv run local-ai-inference        # start the server on http://127.0.0.1:8000
 uv run local-ai-inference inspect <file.gguf>   # summarise a model file
+uv run local-ai-inference serve --model <file.gguf>   # serve a real model
 ```
 
 Tests that need a real model file are marked `model` and skipped by default:
@@ -44,8 +45,8 @@ Run `git checkout main` to return to the latest code.
 | `step-00` | Tooling: uv, ruff, pytest, CI | done |
 | `step-01` | Serving layer: API + server + stub engine | done |
 | `step-02` | Parser: GGUF reader | done |
-| `step-03` | Engine: forward pass, KV cache, sampler | next |
-| `step-04` | Measure: metrics, memory, cold vs warm, parity | planned |
+| `step-03` | Engine: forward pass, KV cache, sampler | done |
+| `step-04` | Measure: metrics, memory, cold vs warm, parity | next |
 
 ## Step 01: serving layer
 
@@ -150,13 +151,68 @@ with GGUFFile("models/SmolLM2-135M-Instruct-Q8_0.gguf") as f:
 The fast tests write small GGUF files with the official `gguf` package and check this reader
 against it: same metadata, same tensor offsets, and bit-identical dequantized values.
 
+## Step 03: inference engine
+
+![Step 03: inference engine](docs/diagrams/step-03-inference-engine.svg)
+
+The stub is replaced by a real engine behind the same `Engine` protocol, so the API and server
+don't change. It's a Llama forward pass in NumPy: about 200 lines you can read top to bottom.
+
+| Part | What it does | Code |
+|---|---|---|
+| Tokenizer | Byte-level BPE rebuilt from the GGUF's vocabulary, merges and special tokens (the merge loop comes from the `tokenizers` library) | `engine/tokenizer.py` |
+| Weights | Every tensor dequantized to float32 once, at load | `Llama.__init__` |
+| Llama block × 30 | RMSNorm → grouped-query attention with RoPE → RMSNorm → SwiGLU feed-forward, each added back to the residual | `Llama.forward` |
+| KV cache | Keys and values of every past token, per layer, so each new token is one pass over the weights | `KVCache` |
+| Prefill / decode | The whole prompt in one pass, then one token per pass | `GGUFEngine.generate` |
+| Sampler | Greedy at `temperature: 0`, otherwise temperature + top-p, seeded | `engine/sampler.py` |
+| Stop | End-of-sequence token, `max_tokens`, or the client leaving | `GGUFEngine.generate` |
+| Chat template | The model's own Jinja template from the GGUF, rendered in a sandbox (server side) | `server/prompt.py` |
+
+**Try it**
+
+```bash
+git checkout step-03
+uv sync
+uv run local-ai-inference serve --model models/SmolLM2-135M-Instruct-Q8_0.gguf
+
+# in another terminal
+curl -s localhost:8000/v1/chat/completions \
+  -H 'content-type: application/json' \
+  -d '{"model": "SmolLM2-135M-Instruct-Q8_0", "temperature": 0, "max_tokens": 40,
+       "messages": [{"role": "user", "content": "What is the capital of France?"}]}'
+curl -s localhost:8000/metrics | grep -E '^lai_(decode|model_load|time_to_first)'
+```
+
+The model ID is the file name without `.gguf`. The OpenAI SDK example from step 01 works
+unchanged with that model ID.
+
+**How it's checked**
+
+- The forward pass matches a deliberately plain reference (no cache, a loop over heads,
+  RoPE written out by hand) on a tiny random-weight model.
+- Decoding token by token with the KV cache gives the same logits as recomputing from scratch.
+- Greedy generation is deterministic; seeded sampling is reproducible.
+- `uv run pytest -m model` asks the real model for the capital of France and expects "Paris".
+- Against llama.cpp on the same Q8_0 file: identical tokenization of the chat prompts, and the
+  same perplexity on 400 tokens of text (17.836 vs 17.835). The two pick the same top token
+  96.8% of the time; the rest are near-ties, because llama.cpp also rounds activations to 8 bits
+  inside its Q8_0 matrix multiply while this engine keeps them in float32. So greedy outputs
+  agree for the first few tokens and can then drift apart.
+
+**One bug worth knowing about.** An early version ran at 2 tokens/s instead of ~18. Dividing
+float32 attention scores by `np.sqrt(64)`, which is a float64 scalar, silently turned the
+activations into float64, so every matrix multiply converted the 538 MB of float32 weights to
+float64 first. Dividing by `math.sqrt(64)` (a plain Python float) fixed it, and a test now checks
+that the logits stay float32.
+
 ## Layout
 
 ```
 src/local_ai_inference/
   api/        HTTP contract: routes and schemas
   server/     lifecycle, admission, prompt prep, output control, streaming, metrics
-  engine/     Engine protocol + stub engine (real engine in step-03)
+  engine/     Engine protocol, GGUF engine (tokenizer, Llama, sampler) + stub engine
   parser/     ModelFile protocol + GGUF reader
   app.py      wires the layers together
 tests/        fast tests; real-model tests are marked `model`

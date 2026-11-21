@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000" role="img" aria-labelledby="t d" xmlns:c2pa="http://c2pa.org/manifest">
+<title id="t">Step 03: inference engine</title>
+<desc id="d">The server calls the engine through the Engine protocol. The engine tokenizes with a byte-level BPE rebuilt from the GGUF file, prefills the prompt, then decodes one token at a time through 30 Llama blocks, storing keys and values in a KV cache and sampling each next token. It loads weights from the parser through the ModelFile protocol at startup.</desc>
+<defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#0f6e56"/></marker>
+<marker id="ahg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5f5e5a"/></marker>
+</defs>
+<rect width="800" height="1000" fill="#ffffff"/>
+<text x="400" y="62" text-anchor="middle" font-family="Poppins, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="34" font-weight="700"><tspan fill="#1a3a52">Step 03</tspan><tspan fill="#1a3a52" dx="12">·</tspan><tspan fill="#c57926" dx="12">Inference Engine</tspan></text>
+<g font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<rect x="250" y="100" width="300" height="56" rx="8" fill="#f1efe8" stroke="#5f5e5a" stroke-width="1.5"/>
+<text x="400" y="124" text-anchor="middle" font-size="16" font-weight="600" fill="#2d2d2d">Server · API</text>
+<text x="400" y="144" text-anchor="middle" font-size="12" fill="#5f5e5a">step-01</text>
+<line x1="400" y1="156" x2="400" y2="240" stroke="#0f6e56" stroke-width="2" marker-end="url(#ah)"/>
+<text x="412" y="182" font-size="13" font-weight="600" fill="#2d2d2d">Engine protocol</text>
+<text x="412" y="200" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#666666">tokenize · generate(ids)</text>
+
+<rect x="60" y="216" width="680" height="476" rx="16" fill="none" stroke="#c57926" stroke-width="2"/>
+<text x="724" y="236" text-anchor="end" font-size="12" font-weight="600" fill="#a45a00">this step</text>
+<rect x="84" y="244" width="632" height="428" rx="8" fill="#e1f5ee" stroke="#0f6e56" stroke-width="1.5"/>
+<text x="104" y="272" font-size="16" font-weight="600" fill="#085041">Engine</text>
+<text x="696" y="272" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#0f6e56">engine/ · GGUFEngine</text>
+<rect x="99" y="290" width="190" height="70" rx="6" fill="#ffffff" stroke="#0f6e56"/>
+<text x="194" y="318" text-anchor="middle" font-size="14" font-weight="600" fill="#085041">Tokenizer</text>
+<text x="194" y="338" text-anchor="middle" font-size="12" fill="#0f6e56">byte-level BPE from GGUF</text>
+<rect x="305" y="290" width="190" height="70" rx="6" fill="#ffffff" stroke="#0f6e56"/>
+<text x="400" y="318" text-anchor="middle" font-size="14" font-weight="600" fill="#085041">KV cache</text>
+<text x="400" y="338" text-anchor="middle" font-size="12" fill="#0f6e56">K, V per layer · grows</text>
+<rect x="511" y="290" width="190" height="70" rx="6" fill="#ffffff" stroke="#0f6e56"/>
+<text x="606" y="318" text-anchor="middle" font-size="14" font-weight="600" fill="#085041">Sampler</text>
+<text x="606" y="338" text-anchor="middle" font-size="12" fill="#0f6e56">greedy · temp · top-p</text>
+<rect x="99" y="376" width="190" height="70" rx="6" fill="#ffffff" stroke="#0f6e56"/>
+<text x="194" y="404" text-anchor="middle" font-size="14" font-weight="600" fill="#085041">Prefill</text>
+<text x="194" y="424" text-anchor="middle" font-size="12" fill="#0f6e56">whole prompt at once</text>
+<rect x="305" y="376" width="190" height="70" rx="6" fill="#ffffff" stroke="#0f6e56"/>
+<text x="400" y="404" text-anchor="middle" font-size="14" font-weight="600" fill="#085041">Decode loop</text>
+<text x="400" y="424" text-anchor="middle" font-size="12" fill="#0f6e56">one token at a time</text>
+<rect x="511" y="376" width="190" height="70" rx="6" fill="#ffffff" stroke="#0f6e56"/>
+<text x="606" y="404" text-anchor="middle" font-size="14" font-weight="600" fill="#085041">Stop</text>
+<text x="606" y="424" text-anchor="middle" font-size="12" fill="#0f6e56">EOS · max_tokens · cancel</text>
+
+<rect x="99" y="462" width="602" height="194" rx="6" fill="#ffffff" stroke="#0f6e56"/>
+<text x="115" y="490" font-size="14" font-weight="600" fill="#085041">Llama block × 30</text>
+<text x="685" y="490" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#0f6e56">engine/llama.py</text>
+<rect x="115" y="522" width="110" height="62" rx="6" fill="#e1f5ee" stroke="#0f6e56"/>
+<text x="170.0" y="554" text-anchor="middle" font-size="14" font-weight="600" fill="#085041">RMSNorm</text>
+<line x1="225" y1="553" x2="245" y2="553" stroke="#0f6e56" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="247" y="522" width="180" height="62" rx="6" fill="#e1f5ee" stroke="#0f6e56"/>
+<text x="337.0" y="545" text-anchor="middle" font-size="14" font-weight="600" fill="#085041">Attention</text>
+<text x="337.0" y="566" text-anchor="middle" font-size="12" fill="#0f6e56">9 Q · 3 KV heads · RoPE</text>
+<line x1="427" y1="553" x2="447" y2="553" stroke="#0f6e56" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="449" y="522" width="110" height="62" rx="6" fill="#e1f5ee" stroke="#0f6e56"/>
+<text x="504.0" y="554" text-anchor="middle" font-size="14" font-weight="600" fill="#085041">RMSNorm</text>
+<line x1="559" y1="553" x2="579" y2="553" stroke="#0f6e56" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="581" y="522" width="110" height="62" rx="6" fill="#e1f5ee" stroke="#0f6e56"/>
+<text x="636.0" y="545" text-anchor="middle" font-size="14" font-weight="600" fill="#085041">Feed-forward</text>
+<text x="636.0" y="566" text-anchor="middle" font-size="12" fill="#0f6e56">SwiGLU</text>
+<text x="400" y="612" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#2d2d2d">x += attention(norm(x));  x += ffn(norm(x))</text>
+<text x="400" y="636" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#666666">embed → 30 blocks → norm → tied output → logits</text>
+
+<line x1="400" y1="790" x2="400" y2="698" stroke="#5f5e5a" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#ahg)"/>
+<text x="412" y="736" font-size="13" font-weight="600" fill="#5f5e5a">ModelFile protocol</text>
+<text x="412" y="754" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#666666">metadata · tensor(name)</text>
+<rect x="250" y="792" width="300" height="56" rx="8" fill="#f1efe8" stroke="#5f5e5a" stroke-width="1.5"/>
+<text x="400" y="816" text-anchor="middle" font-size="16" font-weight="600" fill="#2d2d2d">Parser · GGUF file</text>
+<text x="400" y="836" text-anchor="middle" font-size="12" fill="#5f5e5a">dequantized once, at load</text>
+
+<text x="400" y="905" text-anchor="middle" font-size="18" font-style="italic" fill="#2d2d2d">Every new token is <tspan font-weight="700" fill="#a45a00">one pass over all the weights.</tspan></text>
+<text x="32" y="952" font-size="13" fill="#666666">solid = request path · dashed = load path at startup · orange = this step</text>
+</g>
+<g transform="translate(713 904) scale(0.0554)" aria-label="AI System Design mark">
+<g>
+<polygon fill="#c57926" points="501.0,17.8 501.0,314.6 981.5,295.3"/>
+<polygon fill="#c57926" points="501.0,314.6 981.5,295.3 741.9,724.0"/>
+<polygon fill="#c57926" points="981.5,295.3 741.9,724.0 982.2,852.0"/>
+</g>
+<g fill="none" stroke="#314d95" stroke-width="17.8" stroke-linejoin="miter" stroke-linecap="round">
+<polygon points="501.0,17.8 981.5,295.3 982.2,852.0 502.5,1137.3 18.9,853.2 17.8,298.4"/>
+<polygon points="501.0,314.6 741.9,724.0 260.0,724.2"/>
+<polyline points="17.8,298.4 501.0,314.6 981.5,295.3"/>
+<polyline points="501.0,17.8 501.0,314.6"/>
+<polyline points="17.8,298.4 260.0,724.2 18.9,853.2"/>
+<polyline points="981.5,295.3 741.9,724.0 982.2,852.0"/>
+<polyline points="260.0,724.2 502.5,1137.3 741.9,724.0"/>
+</g>
+</g>
+<metadata><c2pa:manifest>AAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYTo3ODU3NDNmMy0yNmNlLTRmN2ItYjEzOS1lY2VjZDI2OGQzMjIAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaEKyEL5jBVEvzzTuFCf+M7oAAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDpkNWI3OGU4YS03NTk2LTRlZGItODJhNy0yZDE0NTM5MDA4M2NscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNo7e0AKyO8EhKo22STswihaAAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggBiVenVB9+thzJqBnEejb4LZUxK+O0hZCZwa7nBzDEpGkZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaJXQGW5Uq989absILWDbNzsAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRMAAAAAAAAAAAAAAAAZGhhc2hYIEDA31wAeCnhpIqEBzgnvpxO36tfM62o4376C/8ZO6IfZG5hbWVuanVtYmYgbWFuaWZlc3RqZXhjbHVzaW9uc4GiZXN0YXJ0GSA/Zmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOjc4NTc0M2YzLTI2Y2UtNGY3Yi1iMTM5LWVjZWNkMjY4ZDMyMi9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOjZiOGE2NGJmLTY2YWQtNDI1ZS05ZjhkLTMzMjNlNGMyNjIxN3JjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCAGJV6dUH362HMmoGcR6NvgtlTEr47SFkJnBrucHMMSkaJjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggNLe0jxH2VPFHKR8SYXs6B59sD30c0wZGFdxrvfhyKSSiY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFgg8tngBzGAmXbhrHE95y7gWgtYC3LvIykJ9MCAsPlvKWN0Y2xhaW1fZ2VuZXJhdG9yX2luZm+jZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj+OPEz5o+nMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1+UCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9+1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQMVucm6fiVXAT3GWM4+nU7xfL+S8Is2/hhJPEJnR9oqxvBRJrsu+kwUTVnU1nPt+Yy7aEaNan/p+nXchlXv3W7g=</c2pa:manifest></metadata></svg>

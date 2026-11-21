@@ -100,7 +100,10 @@ class InferenceServer:
 
     # --- prompt preparation ---------------------------------------------
     def prepare(self, messages: Sequence[Message]) -> list[int]:
-        prompt = render_chat(messages, self.engine.info.chat_template)
+        info = self.engine.info
+        prompt = render_chat(
+            messages, info.chat_template, bos_token=info.bos_token, eos_token=info.eos_token
+        )
         ids = self.engine.tokenize(prompt)
         if len(ids) >= self.engine.info.context_length:
             self.metrics.rejected.labels("prompt_too_long").inc()

@@ -16,8 +16,10 @@ class ModelInfo:
 
     model_id: str
     context_length: int
-    chat_template: str | None = None  # Jinja template from the model file (step-03)
+    chat_template: str | None = None  # Jinja template from the model file
     eos_token_id: int | None = None
+    bos_token: str = ""  # some chat templates insert these strings
+    eos_token: str = ""
 
 
 @dataclass
