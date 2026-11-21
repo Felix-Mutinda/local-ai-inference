@@ -1,0 +1,46 @@
+[project]
+name = "local-ai-inference"
+version = "0.0.0"
+description = "A custom local AI inference stack: GGUF parser, engine, server and OpenAI-compatible API."
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "Felix Isaiah" }]
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+local-ai-inference = "local_ai_inference:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "ruff>=0.8",
+]
+
+[build-system]
+requires = ["uv_build>=0.11,<0.12"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "local_ai_inference"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # import sorting
+    "UP",  # modern Python syntax
+    "B",   # likely bugs
+    "SIM", # simplifications
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["-ra", "--strict-markers", "-m", "not model"]
+markers = [
+    "model: needs a real GGUF model file under models/ (run with: uv run pytest -m model)",
+]
