@@ -1,10 +1,12 @@
 """The boundary between the engine and the model file.
 
-Defined now so the engine's dependency is explicit; the GGUF reader arrives in step-02.
+The engine depends only on the ModelFile protocol; GGUFFile is one implementation.
 """
 
 from collections.abc import Mapping
 from typing import Any, Protocol
+
+from local_ai_inference.parser.gguf import GGUFError, GGUFFile, TensorInfo, TensorType, dequantize
 
 
 class ModelFile(Protocol):
@@ -14,8 +16,8 @@ class ModelFile(Protocol):
         ...
 
     def tensor(self, name: str) -> Any:
-        """A weight tensor by name, as a NumPy array (step-02)."""
+        """A weight tensor by name, as a float32 NumPy array."""
         ...
 
 
-__all__ = ["ModelFile"]
+__all__ = ["GGUFError", "GGUFFile", "ModelFile", "TensorInfo", "TensorType", "dequantize"]

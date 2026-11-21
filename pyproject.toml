@@ -1,6 +1,6 @@
 [project]
 name = "local-ai-inference"
-version = "0.1.0"
+version = "0.2.0"
 description = "A custom local AI inference stack: GGUF parser, engine, server and OpenAI-compatible API."
 readme = "README.md"
 license = "MIT"
@@ -8,6 +8,7 @@ authors = [{ name = "Felix Isaiah" }]
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.165.0",
+    "numpy>=2.0",
     "prometheus-client>=0.26.0",
     "uvicorn>=0.30",
 ]
@@ -17,7 +18,9 @@ local-ai-inference = "local_ai_inference:main"
 
 [dependency-groups]
 dev = [
+    "gguf>=0.19.0",
     "httpx>=0.28.1",
+    "huggingface-hub>=2.4.0",
     "openai>=3.57.0",
     "pytest>=8.3",
     "ruff>=0.8",

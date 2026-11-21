@@ -8,28 +8,65 @@ Layers, top to bottom:
 """
 
 import argparse
+import json
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="local-ai-inference", description=__doc__.splitlines()[0])
     parser.add_argument("--version", action="version", version=f"local-ai-inference {__version__}")
-    parser.add_argument("--host", default="127.0.0.1", help="bind address (default: localhost)")
-    parser.add_argument("--port", type=int, default=8000)
-    parser.add_argument(
+    sub = parser.add_subparsers(dest="command")
+
+    serve = sub.add_parser("serve", help="start the OpenAI-compatible server (default)")
+    serve.add_argument("--host", default="127.0.0.1", help="bind address (default: localhost)")
+    serve.add_argument("--port", type=int, default=8000)
+    serve.add_argument(
         "--token-delay",
         type=float,
         default=0.02,
         help="seconds between stub tokens, so streaming is visible",
     )
-    args = parser.parse_args(argv)
 
+    inspect = sub.add_parser("inspect", help="summarise a GGUF file")
+    inspect.add_argument("path")
+    inspect.add_argument("--keys", action="store_true", help="also list every metadata key")
+    inspect.add_argument(
+        "--tensors", type=int, default=0, metavar="N", help="list the first N tensors"
+    )
+
+    args = parser.parse_args(argv)
+    if args.command == "inspect":
+        _inspect(args.path, show_keys=args.keys, n_tensors=args.tensors)
+    else:
+        if args.command is None:  # `local-ai-inference` alone means serve, with defaults
+            args = serve.parse_args([])
+        _serve(args.host, args.port, args.token_delay)
+
+
+def _serve(host: str, port: int, token_delay: float) -> None:
     import uvicorn
 
     from local_ai_inference.app import create_app
     from local_ai_inference.engine import StubEngine
 
-    uvicorn.run(
-        create_app(StubEngine(token_delay=args.token_delay)), host=args.host, port=args.port
-    )
+    uvicorn.run(create_app(StubEngine(token_delay=token_delay)), host=host, port=port)
+
+
+def _inspect(path: str, *, show_keys: bool, n_tensors: int) -> None:
+    from local_ai_inference.parser import GGUFFile
+
+    with GGUFFile(path) as f:
+        print(json.dumps(f.summary(), indent=2))
+        if show_keys:
+            print("\nmetadata:")
+            for key, value in f.metadata.items():
+                if isinstance(value, list):
+                    value = f"[{len(value)} items]"
+                elif isinstance(value, str) and len(value) > 80:
+                    value = value[:77] + "..."
+                print(f"  {key} = {value}")
+        if n_tensors:
+            print("\ntensors:")
+            for info in list(f.tensors.values())[:n_tensors]:
+                print(f"  {info.name:32} {info.type_name:6} {info.shape}")
